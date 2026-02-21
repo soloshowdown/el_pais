@@ -12,9 +12,10 @@
 ```bash
 pip install -r requirements.txt
 python main.py --articles 5
+```
 
 
-## Screenshots
+### Screenshots
 
 ![Screenshot 1](screenshots/img1.png)
 ![Screenshot 2](screenshots/img2.png)
