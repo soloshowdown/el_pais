@@ -1,41 +1,69 @@
+import os
 import time
-import logging
+import requests
+from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.chrome.options import Options
 
-logger = logging.getLogger(__name__)
 
-def handle_cookies(driver):
+def scrape_articles(limit=5):
+    options = Options()
+    options.add_argument("--headless")
+    options.add_argument("--disable-gpu")
+
+    driver = webdriver.Chrome(options=options)
+    driver.get("https://elpais.com/opinion/")
+
+    time.sleep(3)
+
+    articles = []
+    links = driver.find_elements(By.CSS_SELECTOR, "article a")[:limit]
+
+    urls = [link.get_attribute("href") for link in links if link.get_attribute("href")]
+
+    for idx, url in enumerate(urls, start=1):
+        driver.get(url)
+        time.sleep(3)
+
+        try:
+            title = driver.find_element(By.TAG_NAME, "h1").text
+        except:
+            title = "No title"
+
+        try:
+            paragraphs = driver.find_elements(By.CSS_SELECTOR, "p")
+            content = " ".join([p.text for p in paragraphs if p.text.strip()])
+        except:
+            content = "No content"
+
+        image_downloaded = download_cover_image(driver, idx)
+
+        articles.append({
+            "title": title,
+            "content": content,
+            "image_downloaded": image_downloaded
+        })
+
+    driver.quit()
+    return articles
+
+
+def download_cover_image(driver, idx):
     try:
-        wait = WebDriverWait(driver, 5)
-        accept_button = wait.until(
-            EC.element_to_be_clickable((
-                By.XPATH,
-                "//button[contains(text(),'Accept') or contains(text(),'Agree') or contains(text(),'Aceptar')]"
-            ))
-        )
-        accept_button.click()
-        logger.info("Cookie consent accepted")
-        time.sleep(2)
-    except TimeoutException:
-        logger.info("No cookie banner found")
+        img = driver.find_element(By.CSS_SELECTOR, "figure img")
+        img_url = img.get_attribute("src")
 
-def scrape_article(driver, url):
-    driver.get(url)
-    handle_cookies(driver)
+        if not img_url:
+            return False
 
-    wait = WebDriverWait(driver, 10)
+        response = requests.get(img_url, timeout=10)
+        if response.status_code == 200:
+            path = f"output/images/article_{idx}.jpg"
+            with open(path, "wb") as f:
+                f.write(response.content)
+            return True
 
-    try:
-        title = wait.until(
-            EC.presence_of_element_located((By.TAG_NAME, "h1"))
-        ).text
     except:
-        title = "N/A"
+        pass
 
-    paragraphs = driver.find_elements(By.TAG_NAME, "p")
-    content = " ".join([p.text for p in paragraphs if len(p.text) > 30])
-
-    return title, content
+    return False

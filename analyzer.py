@@ -1,17 +1,21 @@
 import json
-from collections import Counter
 import os
-import logging
+import re
+from collections import Counter
 
-logger = logging.getLogger(__name__)
 
-def save_repeated_words(words, min_count=2):
+def find_repeated_words(titles):
+    words = []
+
+    for title in titles:
+        cleaned = re.sub(r"[^a-zA-Z ]", "", title.lower())
+        words.extend(cleaned.split())
+
     counter = Counter(words)
-    repeated = {word: count for word, count in counter.items() if count > min_count}
+    return {word: count for word, count in counter.items() if count > 2}
 
-    os.makedirs("output", exist_ok=True)
 
-    with open("output/repeated_words.json", "w", encoding="utf-8") as f:
-        json.dump(repeated, f, indent=4, ensure_ascii=False)
-
-    logger.info("Repeated words saved to output/repeated_words.json")
+def save_repeated_words(data, path="output/data/repeated_words.json"):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(data, f, indent=4)

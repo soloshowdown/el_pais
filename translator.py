@@ -1,15 +1,11 @@
 from googletrans import Translator
-import logging
-
-logger = logging.getLogger(__name__)
 
 translator = Translator()
 
-def translate_text(text, src="es", dest="en"):
+
+def translate_text(text):
     try:
-        translated = translator.translate(text, src=src, dest=dest)
-        logger.info(f"Translated: {text} -> {translated.text}")
+        translated = translator.translate(text, src="es", dest="en")
         return translated.text
-    except Exception as e:
-        logger.error(f"Translation failed for {text}: {e}")
+    except Exception:
         return text

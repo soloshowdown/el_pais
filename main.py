@@ -1,67 +1,38 @@
-import logging
-from selenium import webdriver
-from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.chrome.options import Options
-from webdriver_manager.chrome import ChromeDriverManager
-
-from scraper import scrape_article, handle_cookies
+import os
+from scraper import scrape_articles
 from translator import translate_text
-from analyzer import save_repeated_words
+from analyzer import find_repeated_words, save_repeated_words
 
-# ---------------- LOGGING ----------------
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s | %(levelname)s | %(message)s"
-)
-logger = logging.getLogger(__name__)
 
-# ---------------- SETUP DRIVER ----------------
-options = Options()
-options.add_argument("--start-maximized")
+def main():
+    os.makedirs("output/images", exist_ok=True)
+    os.makedirs("output/data", exist_ok=True)
 
-driver = webdriver.Chrome(
-    service=Service(ChromeDriverManager().install()),
-    options=options
-)
+    print("\nStarting El País Opinion Scraper\n")
 
-BASE_URL = "https://elpais.com/opinion/"
+    articles = scrape_articles(limit=5)
 
-# ---------------- SCRAPING ----------------
-driver.get(BASE_URL)
-handle_cookies(driver)
+    translated_titles = []
 
-article_links = []
-articles = driver.find_elements("css selector", "article h2 a")
+    for idx, article in enumerate(articles, start=1):
+        print(f"\nARTICLE {idx}")
+        print("TITLE (ES):", article["title"])
+        print("CONTENT (ES):", article["content"][:800], "...\n")
 
-for a in articles[:5]:
-    link = a.get_attribute("href")
-    if link:
-        article_links.append(link)
+        translated = translate_text(article["title"])
+        translated_titles.append(translated)
 
-titles_es = []
-titles_en = []
-all_words = []
+        print("TITLE (EN):", translated)
 
-for idx, link in enumerate(article_links, start=1):
-    title_es, content_es = scrape_article(driver, link)
+    repeated_words = find_repeated_words(translated_titles)
+    save_repeated_words(repeated_words)
 
-    print(f"\nARTICLE {idx}")
-    print(f"TITLE (ES): {title_es}")
-    print(f"CONTENT (ES): {content_es[:300]}...")
+    print("\nREPEATED WORDS (>2 times):")
+    for word, count in repeated_words.items():
+        print(f"{word} → {count}")
 
-    title_en = translate_text(title_es)
+    print("\nExecution completed successfully")
 
-    titles_es.append(title_es)
-    titles_en.append(title_en)
 
-    all_words.extend(title_en.lower().split())
-
-# ---------------- RESULTS ----------------
-print("\nTRANSLATED TITLES (EN):")
-for t in titles_en:
-    print("-", t)
-
-save_repeated_words(all_words)
-
-driver.quit()
-logger.info("Execution completed successfully")
+if __name__ == "__main__":
+    main()
