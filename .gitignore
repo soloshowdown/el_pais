@@ -14,9 +14,6 @@ env/
 .env.*
 
 
-output/
-screenshots/
-logs/
 
 .DS_Store
 Thumbs.db
