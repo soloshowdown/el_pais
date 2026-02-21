@@ -24,6 +24,9 @@ Thumbs.db
 chromedriver*
 geckodriver*
 
-output/*
+output/**
+!output/
+!output/images/
+!output/data/
 !output/images/.gitkeep
 !output/data/.gitkeep
