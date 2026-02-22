@@ -27,7 +27,7 @@ python main.py --articles 5
 
 - Generated files (JSON outputs, logs) are excluded from version control using `.gitignore`.
 - A small set of scraped images and screenshots are included only for assignment review and verification purposes.
-- 
+  
 ### Screenshots
 
 ![Screenshot 1](screenshots/img1.png)
