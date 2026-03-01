@@ -8,13 +8,26 @@
 - Identifies repeated words
 - Runs locally and on BrowserStack
 
+## Tech Stack Used
+
+- **Programming Language:** Python 3  
+- **Web Automation / Scraping:** Selenium WebDriver  
+- **Browser Drivers:** ChromeDriver (local), BrowserStack Remote WebDriver  
+- **HTTP Requests:** requests (for downloading images)  
+- **Translation API:** Google Translate (via `googletrans` library)  
+- **Text Analysis:** Python standard libraries (`re`, `collections.Counter`)  
+
 ### Local Execution
 ```bash
 pip install -r requirements.txt
 python main.py --articles 5
 ```
 
+## Notes
 
+- Generated files (JSON outputs, logs) are excluded from version control using `.gitignore`.
+- A small set of scraped images and screenshots are included only for assignment review and verification purposes.
+  
 ### Screenshots
 
 ![Screenshot 1](screenshots/img1.png)
