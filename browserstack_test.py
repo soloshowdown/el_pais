@@ -1,9 +1,14 @@
+
+import os
+import time
+import threading
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-import time
-import os
 
-# 🔐 Use environment variables (BEST PRACTICE)
+from logger import logger
+from config import FULL_OPINION_URL
+
+
 USERNAME = os.getenv("BROWSERSTACK_USERNAME")
 ACCESS_KEY = os.getenv("BROWSERSTACK_ACCESS_KEY")
 
@@ -43,21 +48,20 @@ capabilities_list = [
     }
 ]
 
-drivers = []
 
-for caps in capabilities_list:
+def run_test(caps, index):
+    logger.info(f"Starting BrowserStack session {index + 1}")
+
     options = Options()
 
-    # 🔹 BrowserStack specific options
     bstack_options = {
         "projectName": "El Pais Automation",
         "buildName": "Assignment v1",
-        "sessionName": "Opinion Section Test"
+        "sessionName": f"Opinion Test #{index + 1}"
     }
 
     options.set_capability("bstack:options", bstack_options)
 
-    # 🔹 Set browser / device capabilities
     for key, value in caps.items():
         options.set_capability(key, value)
 
@@ -66,11 +70,24 @@ for caps in capabilities_list:
         options=options
     )
 
-    drivers.append(driver)
+    try:
+        driver.get(FULL_OPINION_URL)
+        time.sleep(5)
+        logger.info(f"[Session {index + 1}] Page title: {driver.title}")
+    finally:
+        driver.quit()
+        logger.info(f"Session {index + 1} completed")
 
-# Run tests
-for driver in drivers:
-    driver.get("https://elpais.com/opinion/")
-    time.sleep(5)
-    print(driver.title)
-    driver.quit()
+
+
+threads = []
+
+for i, caps in enumerate(capabilities_list):
+    t = threading.Thread(target=run_test, args=(caps, i))
+    threads.append(t)
+    t.start()
+
+for t in threads:
+    t.join()
+
+logger.info("All BrowserStack sessions finished")

@@ -1,9 +1,18 @@
+
 BASE_URL = "https://elpais.com"
 OPINION_PATH = "/opinion/"
-ARTICLE_LIMIT = 5
+FULL_OPINION_URL = BASE_URL + OPINION_PATH
 
-IMAGE_DIR = "images"
-SCREENSHOT_DIR = "screenshots"
+
+ARTICLE_LIMIT = 5
+PAGE_LOAD_WAIT = 3
+
+
 OUTPUT_DIR = "output"
+IMAGE_DIR = f"{OUTPUT_DIR}/images"
+SCREENSHOT_DIR = f"{OUTPUT_DIR}/screenshots"
+DATA_DIR = f"{OUTPUT_DIR}/data"
+LOG_FILE = f"{OUTPUT_DIR}/app.log"
+
 
 HEADLESS = False

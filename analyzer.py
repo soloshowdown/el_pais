@@ -1,10 +1,16 @@
+# analyzer.py
+
 import json
 import os
 import re
 from collections import Counter
+from logger import logger
+from config import DATA_DIR
 
 
 def find_repeated_words(titles):
+    logger.info("Analyzing repeated words")
+
     words = []
 
     for title in titles:
@@ -12,10 +18,17 @@ def find_repeated_words(titles):
         words.extend(cleaned.split())
 
     counter = Counter(words)
-    return {word: count for word, count in counter.items() if count > 2}
+    repeated = {word: count for word, count in counter.items() if count > 2}
+
+    logger.info(f"Repeated words found: {repeated}")
+    return repeated
 
 
-def save_repeated_words(data, path="output/data/repeated_words.json"):
-    os.makedirs(os.path.dirname(path), exist_ok=True)
+def save_repeated_words(data):
+    os.makedirs(DATA_DIR, exist_ok=True)
+    path = f"{DATA_DIR}/repeated_words.json"
+
     with open(path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
+
+    logger.info(f"Repeated words saved to {path}")
